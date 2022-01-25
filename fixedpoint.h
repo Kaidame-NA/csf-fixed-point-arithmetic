@@ -3,8 +3,12 @@
 
 #include <stdint.h>
 
-typedef struct {
-  // TODO: add fields
+typedef struct
+{
+    // TODO: add fields
+    uint64_t whole;
+    uint64_t frac;
+    char *tag;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
