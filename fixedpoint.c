@@ -14,6 +14,7 @@ Fixedpoint fixedpoint_create(uint64_t whole)
 
     fixedPoint.whole = whole;
     fixedPoint.frac = 0;
+    fixedPoint.tag = VALID_NONNEGATIVE;
 
     return fixedPoint;
 }
@@ -24,6 +25,7 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac)
 
     fixedPoint.whole = whole;
     fixedPoint.frac = frac;
+    fixedPoint.tag = VALID_NONNEGATIVE;
 
     return fixedPoint;
 }
