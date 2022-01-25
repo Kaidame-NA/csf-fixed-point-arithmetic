@@ -44,6 +44,8 @@ Fixedpoint fixedpoint_create2(uint64_t whole, uint64_t frac)
     {
         fixedPoint.tag = VALID_NONNEGATIVE;
     }
+
+    return fixedPoint;
 }
 
 Fixedpoint fixedpoint_create_from_hex(const char *hex)
