@@ -34,6 +34,7 @@ void test_sub(TestObjs *objs);
 void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 // TODO: add more test functions
+void test_fixedpoint_create(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -63,6 +64,7 @@ int main(int argc, char **argv)
     //   TEST(my_awesome_tests);
     //
     // here. This ensures that your test function will actually be executed.
+    TEST(test_fixedpoint_create);
 
     TEST_FINI();
 }
@@ -271,3 +273,18 @@ void test_is_err(TestObjs *objs)
 }
 
 // TODO: implement more test functions
+
+// Test the fixedpoint_create function
+void test_fixedpoint_create(TestObjs *objs)
+{
+    (void)objs;
+    Fixedpoint test1 = fixedpoint_create(0UL);
+    ASSERT(test1.whole == 0UL);
+    ASSERT(test1.frac == 0UL);
+    ASSERT(test1.tag == VALID_NONNEGATIVE);
+
+    Fixedpoint test2 = fixedpoint_create(17532694UL);
+    ASSERT(test2.whole == 17532694UL);
+    ASSERT(test2.frac == 0UL);
+    ASSERT(test2.tag == VALID_NONNEGATIVE);
+}
