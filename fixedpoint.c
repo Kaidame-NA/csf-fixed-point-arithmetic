@@ -107,9 +107,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right)
 
 int fixedpoint_is_zero(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return 0;
+    return val.whole == 0 && val.frac == 0;
 }
 
 int fixedpoint_is_err(Fixedpoint val)
