@@ -77,6 +77,7 @@ TestObjs *setup(void)
     objs->one_fourth = fixedpoint_create2(0UL, 0x4000000000000000UL);
     objs->large1 = fixedpoint_create2(0x4b19efceaUL, 0xec9a1e2418UL);
     objs->large2 = fixedpoint_create2(0xfcbf3d5UL, 0x4d1a23c24fafUL);
+    objs->max = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL);
 
     return objs;
 }
