@@ -3,12 +3,37 @@
 
 #include <stdint.h>
 
+// An enum that holds the possible tags that a Fixedpoint can have
+// VALID_NONNEGATIVE: Valid, non-negative value
+// VALID_NEGATIVE: Valid, negative value
+// ERROR: Error value
+// OVERFLOW_POSITIVE: Overflow, positive value
+// OVERFLOW_NEGATIVE: Overflow, negative value
+// UNDERFLOW_POSITIVE: Underflow, positive value
+// UNDERFLOW_NEGATIVE: Underflow, negative value
+typedef enum
+{
+    VALID_NONNEGATIVE,
+    VALID_NEGATIVE,
+    ERROR,
+    OVERFLOW_POSITIVE,
+    OVERFLOW_NEGATIVE,
+    UNDERFLOW_POSITIVE,
+    UNDERFLOW_NEGATIVE
+} Tag;
+
+// A struct that holds a Fixedpoint number
+//
+// Fields:
+//  whole - the value of the whole part of the representation
+//  frac - the value of the fractional part of the representation
+//  tag - a tag that keeps track of the value of the Fixedpoint. See the Tag enum for possible tags.
 typedef struct
 {
     // TODO: add fields
     uint64_t whole;
     uint64_t frac;
-    char *tag;
+    Tag tag;
 } Fixedpoint;
 
 // Create a Fixedpoint value representing an integer.
