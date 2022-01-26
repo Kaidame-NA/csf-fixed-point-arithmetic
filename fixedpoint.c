@@ -41,18 +41,18 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex)
     // Max length of a valid string is 34 characters if of the form -X.Y where X and Y are 16 characters long
     if (strlen(hex) > 34 || !isValidHex(hex))
     {
-        fixedPoint.tag == ERROR;
+        fixedPoint.tag = ERROR;
         return fixedPoint;
     }
 
     // Check first character to see if the whole number is negative and assign an initial tag
-    if (hex[0] == "-")
+    if (hex[0] == '-')
     {
-        fixedPoint.tag == VALID_NEGATIVE;
+        fixedPoint.tag = VALID_NEGATIVE;
     }
     else
     {
-        fixedPoint.tag == VALID_NONNEGATIVE;
+        fixedPoint.tag = VALID_NONNEGATIVE;
     }
 
     // TODO: parse valid hex
@@ -66,14 +66,14 @@ int isValidHex(const char *hex)
     int decimalLocation = -1;
     // Marks index of the start of the whole portion, adjusted based on if there is a negative symbol
     int start = 0;
-    for (int i = 0; i < strlen(hex); ++i)
+    for (size_t i = 0; i < strlen(hex); ++i)
     {
-        if (hex[i] == "-" && i == 0)
+        if (hex[i] == '-' && i == 0)
         {
             // Negative symbol can only appear at beginning of string
             start = 1;
         }
-        else if (hex[i] == "." && decimalLocation == -1)
+        else if (hex[i] == '.' && decimalLocation == -1)
         {
             // Only the first decimal point is valid
             decimalLocation = i;
