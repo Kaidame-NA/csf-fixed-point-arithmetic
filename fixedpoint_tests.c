@@ -12,9 +12,7 @@ typedef struct
     Fixedpoint one_fourth;
     Fixedpoint large1;
     Fixedpoint large2;
-    Fixedpoint min_magnitude;
     Fixedpoint max;
-    Fixedpoint min;
 
     // TODO: add more objects to the test fixture
     Fixedpoint random1;
@@ -75,6 +73,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_create2);
     TEST(test_fixedpoint_whole_part);
     TEST(test_fixedpoint_frac_part);
+    TEST(test_fixedpoint_is_zero);
 
     TEST_FINI();
 }
@@ -341,9 +340,28 @@ void test_fixedpoint_whole_part(TestObjs *obj)
     ASSERT(0x029d73dc487b2702UL == fixedpoint_whole_part(obj->random3));
 }
 
+// Additional tests for the fixedpoint_frac_part function
 void test_fixedpoint_frac_part(TestObjs *obj)
 {
     ASSERT(0x49164df1f4c49560UL == fixedpoint_frac_part(obj->random1));
     ASSERT(0x445c9ed1442997a9UL == fixedpoint_frac_part(obj->random2));
     ASSERT(0x8e6cefdf1153d8c9UL == fixedpoint_frac_part(obj->random3));
+}
+
+// Test the fixedpoint_is_zero function
+void test_fixedpoint_is_zero(TestObjs *obj)
+{
+    // Is Zero
+    ASSERT(fixedpoint_is_zero(obj->zero));
+
+    // Is Not Zero
+    ASSERT(!fixedpoint_is_zero(obj->one));
+    ASSERT(!fixedpoint_is_zero(obj->one_half));
+    ASSERT(!fixedpoint_is_zero(obj->one_fourth));
+    ASSERT(!fixedpoint_is_zero(obj->large1));
+    ASSERT(!fixedpoint_is_zero(obj->large2));
+    ASSERT(!fixedpoint_is_zero(obj->max));
+    ASSERT(!fixedpoint_is_zero(obj->random1));
+    ASSERT(!fixedpoint_is_zero(obj->random2));
+    ASSERT(!fixedpoint_is_zero(obj->random3));
 }
