@@ -158,13 +158,20 @@ void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
         wholeString[decimalLocation-temp] = '\0';
         
         strncpy(fracString, decimalLocation+1, hex + strlen(hex) - decimalLocation - 1);
-        fracString[hex + strlen(hex) - decimalLocation -1] = '\0'; 
+        // Pad the fracString with 0s on the end so the hex string takes up all 16 bits
+        // TODO: padding isnt working
+        for(size_t i = hex+strlen(hex) - decimalLocation - 1; i < 16; ++i)
+        {
+            fracString[i] = '0';
+        }
+        fracString[16] = '\0'; 
     }
 
-    // Convert individual hex strings to decimal and do assignment
+    // Convert individual hex strings to unsigned long and do assignment
     // https://stackoverflow.com/questions/10156409/convert-hex-string-char-to-int
     ptrFixedPoint->whole = strtoul(wholeString, NULL, 16);
     ptrFixedPoint->frac = strtoul(fracString, NULL, 16);
+
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val)
