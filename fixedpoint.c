@@ -268,9 +268,7 @@ int fixedpoint_is_underflow_pos(Fixedpoint val)
 
 int fixedpoint_is_valid(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return 0;
+    return val.tag == VALID_NEGATIVE || val.tag == VALID_NONNEGATIVE;
 }
 
 char *fixedpoint_format_as_hex(Fixedpoint val)
