@@ -35,6 +35,7 @@ void test_is_overflow_pos(TestObjs *objs);
 void test_is_err(TestObjs *objs);
 // TODO: add more test functions
 void test_fixedpoint_create(TestObjs *objs);
+void test_fixedpoint_create2(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -65,6 +66,7 @@ int main(int argc, char **argv)
     //
     // here. This ensures that your test function will actually be executed.
     TEST(test_fixedpoint_create);
+    TEST(test_fixedpoint_create2);
 
     TEST_FINI();
 }
@@ -278,13 +280,44 @@ void test_is_err(TestObjs *objs)
 void test_fixedpoint_create(TestObjs *objs)
 {
     (void)objs;
+    // Test with argument 0
     Fixedpoint test1 = fixedpoint_create(0UL);
     ASSERT(test1.whole == 0UL);
     ASSERT(test1.frac == 0UL);
     ASSERT(test1.tag == VALID_NONNEGATIVE);
 
+    // Test with random positive argument
     Fixedpoint test2 = fixedpoint_create(17532694UL);
     ASSERT(test2.whole == 17532694UL);
     ASSERT(test2.frac == 0UL);
     ASSERT(test2.tag == VALID_NONNEGATIVE);
+}
+
+// Test the fixedpoint_create2 function
+void test_fixedpoint_create2(TestObjs *objs)
+{
+    (void)objs;
+    // Test with two zero argument
+    Fixedpoint test1 = fixedpoint_create2(0UL, 0UL);
+    ASSERT(test1.whole == 0UL);
+    ASSERT(test1.frac == 0UL);
+    ASSERT(test1.tag == VALID_NONNEGATIVE);
+
+    // Test with positive argument for whole part, but zero for the fractional part
+    Fixedpoint test2 = fixedpoint_create2(5437923400UL, 0UL);
+    ASSERT(test2.whole == 5437923400UL);
+    ASSERT(test2.frac == 0UL);
+    ASSERT(test2.tag == VALID_NONNEGATIVE);
+
+    // Test with zero for the whole part, but a postive value for the fractional part
+    Fixedpoint test3 = fixedpoint_create2(0UL, 2375984UL);
+    ASSERT(test3.whole == 0UL);
+    ASSERT(test3.frac == 2375984UL);
+    ASSERT(test3.tag == VALID_NONNEGATIVE);
+
+    // Test with positive values for both parts
+    Fixedpoint test4 = fixedpoint_create2(4582UL, 824UL);
+    ASSERT(test4.whole == 4582UL);
+    ASSERT(test4.frac = 824UL);
+    ASSERT(test4.tag == VALID_NONNEGATIVE);
 }
