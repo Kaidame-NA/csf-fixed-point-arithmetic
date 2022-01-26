@@ -91,6 +91,12 @@ int isValidHex(const char *hex);
 //   1 if the character is a valid character in a hex string
 int isValidChar(char c);
 
+// Parses a valid hex and writes the data into the Fixedpoint pointed to by the ptrFixedPoint
+// Parameters:
+//   hex - a valid hex string
+//   ptrFixedPoint - a pointer to a Fixedpoint where the data should be written
+void parseHex(const char *hex, Fixedpoint *ptrFixedPoint);
+
 // Get the whole part of the given Fixedpoint value.
 //
 // Parameters:

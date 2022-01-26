@@ -45,17 +45,8 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex)
         return fixedPoint;
     }
 
-    // Check first character to see if the whole number is negative and assign an initial tag
-    if (hex[0] == '-')
-    {
-        fixedPoint.tag = VALID_NEGATIVE;
-    }
-    else
-    {
-        fixedPoint.tag = VALID_NONNEGATIVE;
-    }
-
     // TODO: parse valid hex
+    parseHex(hex, &fixedPoint);
 
     return fixedPoint;
 }
@@ -128,6 +119,52 @@ int isValidChar(char c)
     {
         return 0;
     }
+}
+
+void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
+{
+    // Create two C strings to hold each part of the hex
+    char wholeString[17];
+    char fracString[17];
+
+    // Find location of the decimal point to slice the string
+    const char *decimalLocation = strchr(hex, '.');
+
+    // Temporary pointer in order to point to various parts of hex to effectively slice strings
+    const char *temp;
+
+    // Assign tag based on sign and assign temp to the beginning of the hex string when excluding the sign
+    if(hex[0] == '-')
+    {
+        ptrFixedPoint->tag = VALID_NEGATIVE;
+        temp = hex + 1;
+    }
+    else
+    {
+        ptrFixedPoint->tag = VALID_NONNEGATIVE;
+        temp = hex;
+    }
+
+    if(decimalLocation == NULL)
+    {
+        // Put everything into wholeString if decimal is not found
+        strcpy(wholeString, temp);
+        strcpy(fracString, "0");
+    }
+    else
+    {
+        // Copy strings based on the location of the decimal
+        strncpy(wholeString, temp, (decimalLocation - temp));
+        wholeString[decimalLocation-temp] = '\0';
+        
+        strncpy(fracString, decimalLocation+1, hex + strlen(hex) - decimalLocation - 1);
+        fracString[hex + strlen(hex) - decimalLocation -1] = '\0'; 
+    }
+
+    // Convert individual hex strings to decimal and do assignment
+    // https://stackoverflow.com/questions/10156409/convert-hex-string-char-to-int
+    ptrFixedPoint->whole = strtoul(wholeString, NULL, 16);
+    ptrFixedPoint->frac = strtoul(fracString, NULL, 16);
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val)
