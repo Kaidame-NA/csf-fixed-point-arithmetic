@@ -17,6 +17,9 @@ typedef struct
     Fixedpoint min;
 
     // TODO: add more objects to the test fixture
+    Fixedpoint random1;
+    Fixedpoint random2;
+    Fixedpoint random3;
 } TestObjs;
 
 // functions to create and destroy the test fixture
@@ -36,6 +39,9 @@ void test_is_err(TestObjs *objs);
 // TODO: add more test functions
 void test_fixedpoint_create(TestObjs *objs);
 void test_fixedpoint_create2(TestObjs *objs);
+void test_fixedpoint_whole_part(TestObjs *objs);
+void test_fixedpoint_frac_part(TestObjs *objs);
+void test_fixedpoint_is_zero(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -67,6 +73,8 @@ int main(int argc, char **argv)
     // here. This ensures that your test function will actually be executed.
     TEST(test_fixedpoint_create);
     TEST(test_fixedpoint_create2);
+    TEST(test_fixedpoint_whole_part);
+    TEST(test_fixedpoint_frac_part);
 
     TEST_FINI();
 }
@@ -83,6 +91,9 @@ TestObjs *setup(void)
     objs->large2 = fixedpoint_create2(0xfcbf3d5UL, 0x4d1a23c24fafUL);
     objs->max = fixedpoint_create2(0xFFFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL);
 
+    objs->random1 = fixedpoint_create2(0x85470e39ad685963UL, 0x49164df1f4c49560UL);
+    objs->random2 = fixedpoint_create2(0x409c93ac8179c4fdUL, 0x445c9ed1442997a9UL);
+    objs->random3 = fixedpoint_create2(0x029d73dc487b2702UL, 0x8e6cefdf1153d8c9UL);
     return objs;
 }
 
@@ -318,6 +329,21 @@ void test_fixedpoint_create2(TestObjs *objs)
     // Test with positive values for both parts
     Fixedpoint test4 = fixedpoint_create2(4582UL, 824UL);
     ASSERT(test4.whole == 4582UL);
-    ASSERT(test4.frac = 824UL);
+    ASSERT(test4.frac == 824UL);
     ASSERT(test4.tag == VALID_NONNEGATIVE);
+}
+
+// Additional tests for the fixedpoint_whole_part function
+void test_fixedpoint_whole_part(TestObjs *obj)
+{
+    ASSERT(0x85470e39ad685963UL == fixedpoint_whole_part(obj->random1));
+    ASSERT(0x409c93ac8179c4fdUL == fixedpoint_whole_part(obj->random2));
+    ASSERT(0x029d73dc487b2702UL == fixedpoint_whole_part(obj->random3));
+}
+
+void test_fixedpoint_frac_part(TestObjs *obj)
+{
+    ASSERT(0x49164df1f4c49560UL == fixedpoint_frac_part(obj->random1));
+    ASSERT(0x445c9ed1442997a9UL == fixedpoint_frac_part(obj->random2));
+    ASSERT(0x8e6cefdf1153d8c9UL == fixedpoint_frac_part(obj->random3));
 }
