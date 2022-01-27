@@ -40,6 +40,7 @@ void test_fixedpoint_create2(TestObjs *objs);
 void test_fixedpoint_whole_part(TestObjs *objs);
 void test_fixedpoint_frac_part(TestObjs *objs);
 void test_fixedpoint_is_zero(TestObjs *objs);
+void test_fixedpoint_create_from_hex(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -74,6 +75,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_whole_part);
     TEST(test_fixedpoint_frac_part);
     TEST(test_fixedpoint_is_zero);
+    TEST(test_fixedpoint_create_from_hex);
 
     TEST_FINI();
 }
@@ -333,35 +335,86 @@ void test_fixedpoint_create2(TestObjs *objs)
 }
 
 // Additional tests for the fixedpoint_whole_part function
-void test_fixedpoint_whole_part(TestObjs *obj)
+void test_fixedpoint_whole_part(TestObjs *objs)
 {
-    ASSERT(0x85470e39ad685963UL == fixedpoint_whole_part(obj->random1));
-    ASSERT(0x409c93ac8179c4fdUL == fixedpoint_whole_part(obj->random2));
-    ASSERT(0x029d73dc487b2702UL == fixedpoint_whole_part(obj->random3));
+    ASSERT(0x85470e39ad685963UL == fixedpoint_whole_part(objs->random1));
+    ASSERT(0x409c93ac8179c4fdUL == fixedpoint_whole_part(objs->random2));
+    ASSERT(0x029d73dc487b2702UL == fixedpoint_whole_part(objs->random3));
 }
 
 // Additional tests for the fixedpoint_frac_part function
-void test_fixedpoint_frac_part(TestObjs *obj)
+void test_fixedpoint_frac_part(TestObjs *objs)
 {
-    ASSERT(0x49164df1f4c49560UL == fixedpoint_frac_part(obj->random1));
-    ASSERT(0x445c9ed1442997a9UL == fixedpoint_frac_part(obj->random2));
-    ASSERT(0x8e6cefdf1153d8c9UL == fixedpoint_frac_part(obj->random3));
+    ASSERT(0x49164df1f4c49560UL == fixedpoint_frac_part(objs->random1));
+    ASSERT(0x445c9ed1442997a9UL == fixedpoint_frac_part(objs->random2));
+    ASSERT(0x8e6cefdf1153d8c9UL == fixedpoint_frac_part(objs->random3));
 }
 
 // Test the fixedpoint_is_zero function
-void test_fixedpoint_is_zero(TestObjs *obj)
+void test_fixedpoint_is_zero(TestObjs *objs)
 {
     // Is Zero
-    ASSERT(fixedpoint_is_zero(obj->zero));
+    ASSERT(fixedpoint_is_zero(objs->zero));
 
     // Is Not Zero
-    ASSERT(!fixedpoint_is_zero(obj->one));
-    ASSERT(!fixedpoint_is_zero(obj->one_half));
-    ASSERT(!fixedpoint_is_zero(obj->one_fourth));
-    ASSERT(!fixedpoint_is_zero(obj->large1));
-    ASSERT(!fixedpoint_is_zero(obj->large2));
-    ASSERT(!fixedpoint_is_zero(obj->max));
-    ASSERT(!fixedpoint_is_zero(obj->random1));
-    ASSERT(!fixedpoint_is_zero(obj->random2));
-    ASSERT(!fixedpoint_is_zero(obj->random3));
+    ASSERT(!fixedpoint_is_zero(objs->one));
+    ASSERT(!fixedpoint_is_zero(objs->one_half));
+    ASSERT(!fixedpoint_is_zero(objs->one_fourth));
+    ASSERT(!fixedpoint_is_zero(objs->large1));
+    ASSERT(!fixedpoint_is_zero(objs->large2));
+    ASSERT(!fixedpoint_is_zero(objs->max));
+    ASSERT(!fixedpoint_is_zero(objs->random1));
+    ASSERT(!fixedpoint_is_zero(objs->random2));
+    ASSERT(!fixedpoint_is_zero(objs->random3));
+}
+
+// Additional tests for fixedpoint_format_as_hex hex strings
+void test_fixedpoint_create_from_hex(TestObjs *objs)
+{
+    (void)objs;
+    // Valid Hex Strings 
+    // Format: X all lower
+    Fixedpoint test1 = fixedpoint_create_from_hex("35d40bfd131c245d");
+    ASSERT(test1.whole == 0x35d40bfd131c245dUL);
+    ASSERT(test1.frac == 0UL);
+    ASSERT(test1.tag == VALID_NONNEGATIVE);
+
+    // Format: X all upper
+    Fixedpoint test2 = fixedpoint_create_from_hex("0346BfBABF7417A0");
+    ASSERT(test2.whole == 0x0346bfbabf7417a0UL);
+    ASSERT(test2.frac == 0UL);
+    ASSERT(test2.tag == VALID_NONNEGATIVE);
+
+    // Format: X mixed upper and lower
+    Fixedpoint test3 = fixedpoint_create_from_hex("3Adf1Af390C74fE9");
+    ASSERT(test3.whole == 0x3adf1af390c74fe9);
+    ASSERT(test3.frac == 0UL);
+    ASSERT(test3.tag == VALID_NONNEGATIVE);
+
+    // Format: -X all lower
+    Fixedpoint test4 = fixedpoint_create_from_hex("-52969e49d9bcd9fc");
+    ASSERT(test4.whole == 0x52969e49d9bcd9fcUL);
+    ASSERT(test4.frac == 0UL);
+    ASSERT(test4.tag == VALID_NEGATIVE);
+
+    // Format: -X all upper
+    Fixedpoint test5 = fixedpoint_create_from_hex("-1007DBA8E9BD4DF0");
+    ASSERT(test5.whole == 0x1007dba8e9bd4df0UL);
+    ASSERT(test5.frac == 0UL);
+    ASSERT(test5.tag == VALID_NEGATIVE);
+
+    // Format: -X mixed upper and lower
+    Fixedpoint test6 = fixedpoint_create_from_hex("-DbCa99C0f5EcDeBd");
+    ASSERT(test6.whole == 0xdbca99c0f5ecdebdUL);
+    ASSERT(test6.frac == 0UL);
+    ASSERT(test6.tag == VALID_NEGATIVE);
+
+    // Format: X.Y all lower, full length
+    Fixedpoint test7 = fixedpoint_create_from_hex("86e212bc97e8bdae.31afa78676593a80");
+    ASSERT(test7.whole == 0x86e212bc97e8bdaeUL);
+    ASSERT(test7.frac == 0x31afa78676593a80UL);
+    ASSERT(test7.tag == VALID_NONNEGATIVE);
+
+    // Format: X.Y all lower, non full length
+    Fixedpoint test8 = fixedpoint_create_from_hex("5f.4761d4081f2c61");
 }
