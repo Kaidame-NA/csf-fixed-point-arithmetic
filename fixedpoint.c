@@ -70,18 +70,18 @@ int isValidHex(const char *hex)
             decimalLocation = i;
 
             // Calculate lengths of whole and fractional portions, restricting them to a 16 character maximum
-            if(decimalLocation - start > 16)
+            if (decimalLocation - start > 16)
             {
                 return 0;
             }
-            if(strlen(hex) - decimalLocation - 1 > 16)
+            if (strlen(hex) - decimalLocation - 1 > 16)
             {
                 return 0;
             }
         }
         else
         {
-            if(!isValidChar(hex[i]))
+            if (!isValidChar(hex[i]))
             {
                 return 0;
             }
@@ -89,9 +89,9 @@ int isValidHex(const char *hex)
     }
 
     // If the loop ends without the decimal location being set, the length of the whole part is the entire string length
-    if(decimalLocation == -1)
+    if (decimalLocation == -1)
     {
-        if(strlen(hex) - start > 16)
+        if (strlen(hex) - start > 16)
         {
             return 0;
         }
@@ -134,7 +134,7 @@ void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
     const char *temp;
 
     // Assign tag based on sign and assign temp to the beginning of the hex string when excluding the sign
-    if(hex[0] == '-')
+    if (hex[0] == '-')
     {
         ptrFixedPoint->tag = VALID_NEGATIVE;
         temp = hex + 1;
@@ -145,7 +145,7 @@ void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
         temp = hex;
     }
 
-    if(decimalLocation == NULL)
+    if (decimalLocation == NULL)
     {
         // Put everything into wholeString if decimal is not found
         strcpy(wholeString, temp);
@@ -155,22 +155,21 @@ void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
     {
         // Copy strings based on the location of the decimal
         strncpy(wholeString, temp, (decimalLocation - temp));
-        wholeString[decimalLocation-temp] = '\0';
-        
-        strncpy(fracString, decimalLocation+1, hex + strlen(hex) - decimalLocation - 1);
+        wholeString[decimalLocation - temp] = '\0';
+
+        strncpy(fracString, decimalLocation + 1, hex + strlen(hex) - decimalLocation - 1);
         // Pad the fracString with 0s on the end so the hex string takes up all 16 bits
-        for(size_t i = hex+strlen(hex) - decimalLocation - 1; i < 16; ++i)
+        for (size_t i = hex + strlen(hex) - decimalLocation - 1; i < 16; ++i)
         {
             fracString[i] = '0';
         }
-        fracString[16] = '\0'; 
+        fracString[16] = '\0';
     }
 
     // Convert individual hex strings to unsigned long and do assignment
     // https://stackoverflow.com/questions/10156409/convert-hex-string-char-to-int
     ptrFixedPoint->whole = strtoul(wholeString, NULL, 16);
     ptrFixedPoint->frac = strtoul(fracString, NULL, 16);
-
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val)
@@ -199,9 +198,20 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
 
 Fixedpoint fixedpoint_negate(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return DUMMY;
+    Fixedpoint fixedPoint;
+    fixedPoint.whole = val.whole;
+    fixedPoint.frac = val.frac;
+    fixedPoint.tag = VALID_NONNEGATIVE; // Assign to nonnegative so it works for the case where val is 0
+
+    if (!fixedpoint_is_zero(val))
+    {
+        if(val.tag == VALID_NONNEGATIVE) // Only need to change value of fixedPoint if val is nonnegative
+        {
+            fixedPoint.tag = VALID_NEGATIVE;
+        }
+    }
+
+    return fixedPoint;
 }
 
 Fixedpoint fixedpoint_halve(Fixedpoint val)
@@ -227,6 +237,11 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right)
 
 int fixedpoint_is_zero(Fixedpoint val)
 {
+    if (!fixedpoint_is_valid(val))
+    {
+        return 0;
+    }
+
     return val.whole == 0 && val.frac == 0;
 }
 
