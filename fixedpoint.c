@@ -247,9 +247,9 @@ int fixedpoint_is_zero(Fixedpoint val)
 
 int fixedpoint_is_err(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return 0;
+    Tag tag = val.tag;
+    return tag == OVERFLOW_POSITIVE || tag == OVERFLOW_NEGATIVE ||
+            tag == UNDERFLOW_NEGATIVE || tag == UNDERFLOW_POSITIVE || tag == ERROR;
 }
 
 int fixedpoint_is_neg(Fixedpoint val)
