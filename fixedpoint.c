@@ -159,7 +159,6 @@ void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
         
         strncpy(fracString, decimalLocation+1, hex + strlen(hex) - decimalLocation - 1);
         // Pad the fracString with 0s on the end so the hex string takes up all 16 bits
-        // TODO: padding isnt working
         for(size_t i = hex+strlen(hex) - decimalLocation - 1; i < 16; ++i)
         {
             fracString[i] = '0';

@@ -417,4 +417,19 @@ void test_fixedpoint_create_from_hex(TestObjs *objs)
 
     // Format: X.Y all lower, non full length
     Fixedpoint test8 = fixedpoint_create_from_hex("5f.4761d4081f2c61");
+    ASSERT(test8.whole == 0x5fUL);
+    ASSERT(test8.frac = 0x4761d4081f2c6100UL);
+    ASSERT(test8.tag == VALID_NONNEGATIVE);
+
+    // Format: -X.Y all lower, full length
+    Fixedpoint test9 = fixedpoint_create_from_hex("-cfe39e37ffd3df69.7dfb9a356ec9c702");
+    ASSERT(test9.whole == 0xcfe39e37ffd3df69UL);
+    ASSERT(test9.frac == 0x7dfb9a356ec9c702UL);
+    ASSERT(test9.tag == VALID_NEGATIVE);
+
+    // Format: -X.Y all lower, non full length
+    Fixedpoint test10 = fixedpoint_create_from_hex("-c80c5245c81554e.fe5b80f41");
+    ASSERT(test10.whole == 0xc80c5245c81554eUL);
+    ASSERT(test10.frac == 0xfe5b80f410000000UL);
+    ASSERT(test10.tag == VALID_NEGATIVE);
 }
