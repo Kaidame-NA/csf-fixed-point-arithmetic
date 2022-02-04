@@ -80,7 +80,7 @@ Fixedpoint fixedpoint_create_from_hex(const char *hex);
 // Returns:
 //   0 if hex is not a valid hex string
 //   1 if hex is a valid hex string
-int isValidHex(const char *hex);
+int is_valid_hex(const char *hex);
 
 // Determines if a particular character is a valid character in a hex string
 // The valid characters are 0-9, a-f, and A-F
@@ -89,13 +89,13 @@ int isValidHex(const char *hex);
 // Returns:
 //   0 if the character is not a valid character in a hex string
 //   1 if the character is a valid character in a hex string
-int isValidChar(char c);
+int is_valid_char(char c);
 
 // Parses a valid hex and writes the data into the Fixedpoint pointed to by the ptrFixedPoint
 // Parameters:
 //   hex - a valid hex string
 //   ptrFixedPoint - a pointer to a Fixedpoint where the data should be written
-void parseHex(const char *hex, Fixedpoint *ptrFixedPoint);
+void parse_hex(const char *hex, Fixedpoint *ptrFixedPoint);
 
 // Get the whole part of the given Fixedpoint value.
 //
