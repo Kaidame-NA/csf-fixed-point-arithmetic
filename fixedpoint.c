@@ -5,9 +5,6 @@
 #include <assert.h>
 #include "fixedpoint.h"
 
-// You can remove this once all of the functions are fully implemented
-static Fixedpoint DUMMY;
-
 Fixedpoint fixedpoint_create(uint64_t whole)
 {
     Fixedpoint fixedPoint;
@@ -184,10 +181,10 @@ uint64_t fixedpoint_frac_part(Fixedpoint val)
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
 {
-    if(left.tag != right.tag)
+    if (left.tag != right.tag)
     {
         // If they are different signs, convert negative one to positive and perform subtraction
-        if(left.tag == VALID_NONNEGATIVE)
+        if (left.tag == VALID_NONNEGATIVE)
         {
             return fixedpoint_sub(left, fixedpoint_negate(right));
         }
@@ -201,7 +198,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
         // Normal addition with sign staying the same as whatever the sign of left and right are
         Fixedpoint sum;
         sum.frac = left.frac + right.frac;
-        if(sum.frac < left.frac) // If overflow, we need to carry
+        if (sum.frac < left.frac) // If overflow, we need to carry
         {
             sum.whole = 1UL + left.whole + right.whole;
         }
@@ -210,9 +207,9 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
             sum.whole = left.whole + right.whole;
         }
         // Check for overflow in whole portion
-        if(sum.whole < left.whole)
+        if (sum.whole < left.whole)
         {
-            if(left.tag == VALID_NONNEGATIVE)
+            if (left.tag == VALID_NONNEGATIVE)
             {
                 sum.tag = OVERFLOW_NEGATIVE;
             }
@@ -232,7 +229,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
 {
-    if(left.tag != right.tag)
+    if (left.tag != right.tag)
     {
         // If signs are different, we can calculate it using addition of two fixedpoints of the same sign
         return fixedpoint_add(left, fixedpoint_negate(right));
@@ -241,7 +238,7 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
     {
         // Determine sign by comparing which one is larger and then subtract the larger magnitude from the smaller magnitude
         Fixedpoint difference;
-        if(fixedpoint_compare(left, right) == 1)
+        if (fixedpoint_compare(left, right) == 1)
         {
             difference.tag = VALID_NEGATIVE;
         }
@@ -250,13 +247,13 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
             difference.tag = VALID_NONNEGATIVE;
         }
 
-        if(compare_magnitude(left, right) == 1)
+        if (compare_magnitude(left, right) == 1)
         {
             // Perform borrow
-            if(right.frac > left.frac)
+            if (right.frac > left.frac)
             {
                 difference.whole = left.whole - right.whole - 1;
-                difference.frac = (0xFFFFFFFFFFFFFFFFUL - right.frac) + left.frac + 1; 
+                difference.frac = (0xFFFFFFFFFFFFFFFFUL - right.frac) + left.frac + 1;
             }
             else
             {
@@ -266,9 +263,9 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
         }
         else
         {
-            if(left.frac > right.frac)
+            if (left.frac > right.frac)
             {
-                difference.whole = right.whole - left.whole -1;
+                difference.whole = right.whole - left.whole - 1;
                 difference.frac = (0xFFFFFFFFFFFFFFFFUL - left.frac) + right.frac + 1;
             }
             else
@@ -277,7 +274,7 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
                 difference.frac = right.frac - left.frac;
             }
         }
-        
+
         return difference;
     }
 }
@@ -291,7 +288,7 @@ Fixedpoint fixedpoint_negate(Fixedpoint val)
 
     if (!fixedpoint_is_zero(val))
     {
-        if(val.tag == VALID_NONNEGATIVE) // Only need to change value of fixedPoint if val is nonnegative
+        if (val.tag == VALID_NONNEGATIVE) // Only need to change value of fixedPoint if val is nonnegative
         {
             fixedPoint.tag = VALID_NEGATIVE;
         }
@@ -302,24 +299,46 @@ Fixedpoint fixedpoint_negate(Fixedpoint val)
 
 Fixedpoint fixedpoint_halve(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return DUMMY;
+    Fixedpoint quotient;
+    quotient.whole = val.whole / 2;
+    quotient.frac = val.frac / 2;
+    // If least significant bit in front of decimal is 1, we add 0.5 to fractional part after halving
+    if (val.whole & 1UL)
+    {
+        quotient.frac += (0xFFFFFFFFFFFFFFFFUL);
+    }
+
+    // If least significant bit in frac part is 1, we encounter underflow
+    if (val.frac & 1UL)
+    {
+        if (val.tag == VALID_NONNEGATIVE)
+        {
+            quotient.tag = UNDERFLOW_POSITIVE;
+        }
+        else
+        {
+            quotient.tag = UNDERFLOW_NEGATIVE;
+        }
+    }
+    else
+    {
+        quotient.tag = val.tag;
+    }
+
+    return quotient;
 }
 
 Fixedpoint fixedpoint_double(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return DUMMY;
+    return fixedpoint_add(val, val);
 }
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right)
 {
     // Compare signs
-    if(left.tag == right.tag)
+    if (left.tag == right.tag)
     {
-        if(left.tag == VALID_NONNEGATIVE)
+        if (left.tag == VALID_NONNEGATIVE)
         {
             return compare_magnitude(left, right);
         }
@@ -331,7 +350,7 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right)
     else
     {
         // Nonnegative is greater than negative
-        if(left.tag == VALID_NONNEGATIVE)
+        if (left.tag == VALID_NONNEGATIVE)
         {
             return 1;
         }
@@ -344,14 +363,14 @@ int fixedpoint_compare(Fixedpoint left, Fixedpoint right)
 
 int compare_magnitude(Fixedpoint left, Fixedpoint right)
 {
-    // Compare whole portions
-    if(left.whole == right.whole)
+    // Compare whole portionsA and then frac portions
+    if (left.whole == right.whole)
     {
-        if(left.frac == right.frac)
+        if (left.frac == right.frac)
         {
             return 0;
         }
-        else if(left.frac > right.frac)
+        else if (left.frac > right.frac)
         {
             return 1;
         }
@@ -360,7 +379,7 @@ int compare_magnitude(Fixedpoint left, Fixedpoint right)
             return -1;
         }
     }
-    else if(left.whole > right.whole)
+    else if (left.whole > right.whole)
     {
         return 1;
     }
@@ -387,7 +406,7 @@ int fixedpoint_is_err(Fixedpoint val)
 
 int fixedpoint_is_neg(Fixedpoint val)
 {
-    if(fixedpoint_is_err(val) || val.tag == VALID_NONNEGATIVE)
+    if (fixedpoint_is_err(val) || val.tag == VALID_NONNEGATIVE)
     {
         return 0;
     }
