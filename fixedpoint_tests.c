@@ -90,6 +90,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_frac_part);
     TEST(test_fixedpoint_is_zero);
     TEST(test_fixedpoint_create_from_hex);
+    TEST(test_fixedpoint_negate);
 
     TEST_FINI();
 }
@@ -446,4 +447,115 @@ void test_fixedpoint_create_from_hex(TestObjs *objs)
     ASSERT(test10.whole == 0xc80c5245c81554eUL);
     ASSERT(test10.frac == 0xfe5b80f410000000UL);
     ASSERT(test10.tag == VALID_NEGATIVE);
+
+    // Format: 0
+    Fixedpoint test11 = fixedpoint_create_from_hex("0");
+    ASSERT(test11.whole == 0UL);
+    ASSERT(test11.frac == 0UL);
+    ASSERT(test11.tag == VALID_NONNEGATIVE);
+
+    // Format: -0
+    Fixedpoint test12 = fixedpoint_create_from_hex("-0");
+    ASSERT(test12.whole == 0UL);
+    ASSERT(test12.frac == 0UL);
+    ASSERT(test12.tag == VALID_NONNEGATIVE);
+
+    // Format: X.
+    Fixedpoint test13 = fixedpoint_create_from_hex("5ba9f.");
+    ASSERT(test13.whole == 0x5ba9fUL);
+    ASSERT(test12.frac == 0UL);
+    ASSERT(test13.tag == VALID_NONNEGATIVE);
+
+    // Format: .Y
+    Fixedpoint test14 = fixedpoint_create_from_hex(".cda133");
+    ASSERT(test14.whole == 0UL);
+    ASSERT(test14.frac == 0xcda1330000000000UL);
+    ASSERT(test14.tag == VALID_NONNEGATIVE);
+
+    // Format: -X.
+    Fixedpoint test15 = fixedpoint_create_from_hex("-4eff75dd.");
+    ASSERT(test15.whole == 0x4eff75ddUL);
+    ASSERT(test15.frac == 0UL);
+    ASSERT(test15.tag == VALID_NEGATIVE);
+
+    // Format : -.Y
+    Fixedpoint test16 = fixedpoint_create_from_hex("-.0ed");
+    ASSERT(test16.whole == 0UL);
+    ASSERT(test16.frac == 0x0ed0000000000000UL);
+    ASSERT(test16.tag == VALID_NEGATIVE);
+
+    // Two negative signs
+    Fixedpoint test17 = fixedpoint_create_from_hex("-0a-fb");
+    ASSERT(test17.tag == ERROR);
+
+    // Negative sign in wrong place
+    Fixedpoint test18 = fixedpoint_create_from_hex("0.b7-a");
+    ASSERT(test18.tag == ERROR);
+
+    // Two decimal points
+    Fixedpoint test19 = fixedpoint_create_from_hex("108.1d43f9.0c5572f");
+    ASSERT(test19.tag == ERROR);
+
+    // X.Y too long
+    Fixedpoint test20 = fixedpoint_create_from_hex("94aa7a8bc03118f50.94aa7a8bc03118f05");
+    ASSERT(test20.tag == ERROR);
+
+    //X.Y, X too long
+    Fixedpoint test21 = fixedpoint_create_from_hex("1fab80b1e8e3ccce0.abcdef");
+    ASSERT(test21.tag == ERROR);
+
+    // X.Y, Y too long
+    Fixedpoint test22 = fixedpoint_create_from_hex("0.2e36b5f14a0bde3c1");
+    ASSERT(test22.tag == ERROR);
+
+    // X, X too long
+    Fixedpoint test23 = fixedpoint_create_from_hex("5580a175a6f94a391");
+    ASSERT(test23.tag == ERROR);
+
+    // Nonsense characters
+    Fixedpoint test24 = fixedpoint_create_from_hex("130284yhufdjaads");
+    ASSERT(test24.tag == ERROR);
+
+    Fixedpoint test25 = fixedpoint_create_from_hex("5a 75 0a 35. cc b6 28 09 ");
+    ASSERT(test25.tag == ERROR);
+}
+
+// Additional tests for fixedpoint_negate;
+void test_fixedpoint_negate(TestObjs *objs)
+{
+    (void) objs;
+    // X -> -X
+    Fixedpoint test1 = fixedpoint_create_from_hex("b4adb9d9d7e644c5");
+    Fixedpoint test1negate = fixedpoint_negate(test1);
+    ASSERT(test1negate.tag == VALID_NEGATIVE);
+    ASSERT(test1.whole == test1negate.whole);
+    ASSERT(test1.frac == test1negate.frac);
+
+    // X.Y -> -X.Y
+    Fixedpoint test2 = fixedpoint_create_from_hex("cd049a3b5dc1b337.faef5a1039f76c76");
+    Fixedpoint test2negate = fixedpoint_negate(test2);
+    ASSERT(test2negate.tag == VALID_NEGATIVE);
+    ASSERT(test2.whole == test2negate.whole);
+    ASSERT(test2.frac == test2negate.frac);
+
+    // -X -> X
+    Fixedpoint test3 = fixedpoint_create_from_hex("-48599cc4c4c64660");
+    Fixedpoint test3negate = fixedpoint_negate(test3);
+    ASSERT(test3negate.tag == VALID_NONNEGATIVE);
+    ASSERT(test3.whole == test3negate.whole);
+    ASSERT(test3.frac == test3negate.frac);
+
+    // -X.Y -> X.Y
+    Fixedpoint test4 = fixedpoint_create_from_hex("-4ea49caad95efe00.fbe77b8e0f1b82cd");
+    Fixedpoint test4negate = fixedpoint_negate(test4);
+    ASSERT(test4negate.tag == VALID_NONNEGATIVE);
+    ASSERT(test4.whole == test4negate.whole);
+    ASSERT(test4.frac == test4negate.frac);
+
+    // 0 
+    Fixedpoint test5 = fixedpoint_create_from_hex("0");
+    Fixedpoint test5negate = fixedpoint_negate(test5);
+    ASSERT(test5negate.tag == VALID_NONNEGATIVE);
+    ASSERT(test5.whole == test5negate.whole);
+    ASSERT(test5.frac == test5negate.frac);
 }
