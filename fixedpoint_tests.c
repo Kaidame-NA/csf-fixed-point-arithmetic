@@ -95,6 +95,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_sub);
     TEST(test_fixedpoint_halve);
     TEST(test_fixedpoint_double);
+    TEST(test_fixedpoint_compare);
 
     TEST_FINI();
 }
@@ -773,4 +774,48 @@ void test_fixedpoint_double(TestObjs *objs)
     // Overflow X -> 2X, X is neg
     Fixedpoint test4 = fixedpoint_double(fixedpoint_negate(objs->max));
     ASSERT(test4.tag == OVERFLOW_NEGATIVE);
+}
+
+void test_fixedpoint_compare(TestObjs *objs)
+{
+    (void)objs;
+    // A > B, A nonneg, B nonneg
+    Fixedpoint test1A = fixedpoint_create_from_hex("101.10");
+    Fixedpoint test1B = fixedpoint_create_from_hex("101.001");
+    ASSERT(fixedpoint_compare(test1A, test1B) == 1);
+
+    // A = B, A nonneg, B nonneg
+    Fixedpoint test2A = fixedpoint_create_from_hex("1124.134");
+    Fixedpoint test2B = fixedpoint_create_from_hex("00000001124.13400");
+    ASSERT(fixedpoint_compare(test2A, test2B) == 0);
+
+    // A < B, A nonneg, B nonneg
+    Fixedpoint test3A = fixedpoint_create_from_hex("9217f12c4d2333.0515047f39a07");
+    Fixedpoint test3B = fixedpoint_create_from_hex("9217f12c4d2343.0515047f39a07");
+    ASSERT(fixedpoint_compare(test3A, test3B) == -1);
+
+    // A > B, A nonneg, B neg
+    Fixedpoint test4A = fixedpoint_create_from_hex("3cf6c445.827b10946ce00");
+    Fixedpoint test4B = fixedpoint_create_from_hex("-6.1291e");
+    ASSERT(fixedpoint_compare(test4A, test4B) == 1);
+
+    // A < B, A neg, B nonneg
+    Fixedpoint test5A = fixedpoint_create_from_hex("-7779fe12f.ef0077525f9");
+    Fixedpoint test5B = fixedpoint_create_from_hex("3e5aec3b31e7c.65af0151a4");
+    ASSERT(fixedpoint_compare(test5A, test5B) == -1);
+
+    // A > B, A neg, B neg
+    Fixedpoint test6A = fixedpoint_create_from_hex("-1000");
+    Fixedpoint test6B = fixedpoint_create_from_hex("-100000");
+    ASSERT(fixedpoint_compare(test6A, test6B) == 1);
+
+    // A = B, A neg, B neg
+    Fixedpoint test7A = fixedpoint_create_from_hex("-100.000");
+    Fixedpoint test7B = fixedpoint_create_from_hex("-0000100.00000");
+    ASSERT(fixedpoint_compare(test7A, test7B) == 0);
+
+    // A < B, A neg, B neg
+    Fixedpoint test8A = fixedpoint_create_from_hex("-100.010");
+    Fixedpoint test8B = fixedpoint_create_from_hex("-100.001");
+    ASSERT(fixedpoint_compare(test8A, test8B) == -1);
 }
