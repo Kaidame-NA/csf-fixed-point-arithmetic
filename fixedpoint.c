@@ -269,9 +269,7 @@ int fixedpoint_is_overflow_neg(Fixedpoint val)
 
 int fixedpoint_is_overflow_pos(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    return 0;
+    return val.tag == OVERFLOW_POSITIVE;
 }
 
 int fixedpoint_is_underflow_neg(Fixedpoint val)
