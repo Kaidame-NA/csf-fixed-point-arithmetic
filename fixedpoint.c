@@ -211,11 +211,11 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
         {
             if (left.tag == VALID_NONNEGATIVE)
             {
-                sum.tag = OVERFLOW_NEGATIVE;
+                sum.tag = OVERFLOW_POSITIVE;
             }
             else
             {
-                sum.tag = OVERFLOW_POSITIVE;
+                sum.tag = OVERFLOW_NEGATIVE;
             }
         }
         else
@@ -240,11 +240,11 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
         Fixedpoint difference;
         if (fixedpoint_compare(left, right) == 1)
         {
-            difference.tag = VALID_NEGATIVE;
+            difference.tag = VALID_NONNEGATIVE;
         }
         else
         {
-            difference.tag = VALID_NONNEGATIVE;
+            difference.tag = VALID_NEGATIVE;
         }
 
         if (compare_magnitude(left, right) == 1)

@@ -91,6 +91,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_is_zero);
     TEST(test_fixedpoint_create_from_hex);
     TEST(test_fixedpoint_negate);
+    TEST(test_fixedpoint_add);
 
     TEST_FINI();
 }
@@ -558,4 +559,82 @@ void test_fixedpoint_negate(TestObjs *objs)
     ASSERT(test5negate.tag == VALID_NONNEGATIVE);
     ASSERT(test5.whole == test5negate.whole);
     ASSERT(test5.frac == test5negate.frac);
+}
+
+void test_fixedpoint_add(TestObjs *objs)
+{
+    // Valid A + B, A, B nonneg
+    Fixedpoint test1A = fixedpoint_create_from_hex("d669c.108");
+    Fixedpoint test1B = fixedpoint_create_from_hex("510ce1e942a3c19.430fc51");
+    Fixedpoint test1sum = fixedpoint_add(test1A, test1B);
+
+    ASSERT(test1sum.tag == VALID_NONNEGATIVE);
+    ASSERT(test1sum.whole == 0x510ce1e9437a2b5UL);
+    ASSERT(test1sum.frac == 0x538fc51000000000UL);
+
+    // Valid A+B, A, B nonneg carry
+    Fixedpoint test2A = fixedpoint_create_from_hex("72c.7e2210b");
+    Fixedpoint test2B = fixedpoint_create_from_hex("d480cf0fa6.a62ee52");
+    Fixedpoint test2sum = fixedpoint_add(test2A, test2B);
+    ASSERT(test2sum.tag == VALID_NONNEGATIVE);
+    ASSERT(test2sum.whole == 0xd480cf16d3UL);
+    ASSERT(test2sum.frac == 0x2450f5d000000000UL);
+
+    // Overflow A+B, A, B nonneg
+    Fixedpoint test3sum = fixedpoint_add(objs->max, objs->one);
+    ASSERT(test3sum.tag == OVERFLOW_POSITIVE);
+
+    // Valid A + B, A, B neg
+    Fixedpoint test4A = fixedpoint_create_from_hex("-82d3905e2.3748bc8301ee08a");
+    Fixedpoint test4B = fixedpoint_create_from_hex("-3.ab8b0e6a4a79");
+    Fixedpoint test4sum = fixedpoint_add(test4A, test4B);
+    ASSERT(test4sum.tag == VALID_NEGATIVE);
+    ASSERT(test4sum.whole == 0x82d3905e5UL);
+    ASSERT(test4sum.frac == 0xe2d3caed4c6708a0UL);
+
+    // Valid A + B, A, B neg carry
+    Fixedpoint test5A = fixedpoint_create_from_hex("-6f.adde49718d50f");
+    Fixedpoint test5B = fixedpoint_create_from_hex("-0c8890.829fe8598cbb9");
+    Fixedpoint test5sum = fixedpoint_add(test5A, test5B);
+    ASSERT(test5sum.tag == VALID_NEGATIVE);
+    ASSERT(test5sum.whole == 0xc8900UL);
+    ASSERT(test5sum.frac == 0x307e31cb1a0c8000);
+
+    // Overflow A + B, A, B neg
+    Fixedpoint test6A = fixedpoint_negate(objs->max);
+    Fixedpoint test6B = fixedpoint_negate(objs->one);
+    Fixedpoint test6sum = fixedpoint_add(test6A, test6B);
+    ASSERT(test6sum.tag == OVERFLOW_NEGATIVE);
+
+    // Valid A + B, A nonneg, B neg, neg result
+    Fixedpoint test7A = fixedpoint_create_from_hex("32df5b1458.d1792dfe63f5");
+    Fixedpoint test7B = fixedpoint_create_from_hex("-0bd92be903550f.7b5a389f8ef6");
+    Fixedpoint test7sum = fixedpoint_add(test7A, test7B);
+    ASSERT(test7sum.tag == VALID_NEGATIVE);
+    ASSERT(test7sum.whole == 0xbd8f909a840b6UL);
+    ASSERT(test7sum.frac == 0xa9e10aa12b010000UL);
+
+    // Valid A + B, A nonneg, B neg, nonneg result
+    Fixedpoint test8A = fixedpoint_create_from_hex("71ffefb2e34.c21af83e");
+    Fixedpoint test8B = fixedpoint_create_from_hex("-9ae395aa2d.c");
+    Fixedpoint test8sum = fixedpoint_add(test8A, test8B);
+    ASSERT(test8sum.tag == VALID_NONNEGATIVE);
+    ASSERT(test8sum.whole == 0x6851b658407UL);
+    ASSERT(test8sum.frac == 0x021af83e00000000UL);
+
+    // Valid A + B, A neg, B nonneg, neg result
+    Fixedpoint test9A = fixedpoint_create_from_hex("-e12dc7fe1b74cdc.62f5a5824e8");
+    Fixedpoint test9B = fixedpoint_create_from_hex("8738a364a726e.348e9703");
+    Fixedpoint test9sum = fixedpoint_add(test9A, test9B);
+    ASSERT(test9sum.tag == VALID_NEGATIVE);
+    ASSERT(test9sum.whole == 0xe0a68f5ab6cda6eUL);
+    ASSERT(test9sum.frac == 0x2e670e7f4e800000);
+
+    // Valid A + B, A neg, B nonneg, nonnneg result
+    Fixedpoint test10A = fixedpoint_create_from_hex("-dfc94da.cce");
+    Fixedpoint test10B = fixedpoint_create_from_hex("1d4e4700.0");
+    Fixedpoint test10sum = fixedpoint_add(test10A, test10B);
+    ASSERT(test10sum.tag == VALID_NONNEGATIVE);
+    ASSERT(test10sum.whole == 0xf51b225UL);
+    ASSERT(test10sum.frac == 0x3320000000000000);
 }
