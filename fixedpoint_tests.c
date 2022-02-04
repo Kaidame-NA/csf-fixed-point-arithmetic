@@ -41,6 +41,20 @@ void test_fixedpoint_whole_part(TestObjs *objs);
 void test_fixedpoint_frac_part(TestObjs *objs);
 void test_fixedpoint_is_zero(TestObjs *objs);
 void test_fixedpoint_create_from_hex(TestObjs *objs);
+void test_fixedpoint_negate(TestObjs *objs);
+void test_fixedpoint_add(TestObjs *objs);
+void test_fixedpoint_sub(TestObjs *objs);
+void test_fixedpoint_halve(TestObjs *objs);
+void test_fixedpoint_double(TestObjs *objs);
+void test_fixedpoint_compare(TestObjs *objs);
+void test_fixedpoint_is_err(TestObjs *objs);
+void test_fixedpoint_is_neg(TestObjs *objs);
+void test_fixedpoint_is_overflow_neg(TestObjs *objs);
+void test_fixedpoint_is_overflow_pos(TestObjs *objs);
+void test_fixedpoint_is_underflow_neg(TestObjs *objs);
+void test_fixedpoint_is_underflow_pos(TestObjs *objs);
+void test_fixedpoint_is_valid(TestObjs *objs);
+void test_fixedpoint_format_as_hex(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
