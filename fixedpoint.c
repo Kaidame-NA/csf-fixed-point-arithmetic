@@ -443,9 +443,50 @@ int fixedpoint_is_valid(Fixedpoint val)
 
 char *fixedpoint_format_as_hex(Fixedpoint val)
 {
-    // TODO: implement
-    assert(0);
-    char *s = malloc(20);
-    strcpy(s, "<invalid>");
+    char *s = malloc(35 * sizeof(char));
+    size_t nextIndex = 0;
+    if (fixedpoint_is_err(val))
+    {
+        strcpy(s, "<invalid>");
+    }
+    else
+    {
+        // Check for negative sign
+        if (fixedpoint_is_neg(val))
+        {
+            s[nextIndex++] = '-';
+        }
+
+        // Convert whole part to hex string
+        // https://stackoverflow.com/questions/3464194/how-can-i-convert-an-integer-to-a-hexadecimal-string-in-c
+        char whole[17];
+        sprintf(whole, "%lx", val.whole);
+        // Use pointer arithmetic to place in the right place
+        strcpy(s + nextIndex, whole);
+        nextIndex += strlen(whole);
+
+        // Check fractional part to see whether to put decimal point
+        if (val.frac == 0UL)
+        {
+            s[nextIndex] = '\0';
+            return s;
+        }
+        else
+        {
+            s[nextIndex++] = '.';
+        }
+
+        // Convert frac part to string
+        char frac[17];
+        // Remove trailing 0s
+        uint64_t fracCopy = val.frac;
+        while ((fracCopy & 1UL) == 0)
+        {
+            fracCopy >>= 1UL;
+        }
+        sprintf(frac, "%lx", fracCopy);
+        strcpy(s + nextIndex, frac);
+        s[nextIndex + 1] = '0';
+    }
     return s;
 }
