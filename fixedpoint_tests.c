@@ -18,6 +18,13 @@ typedef struct
     Fixedpoint random1;
     Fixedpoint random2;
     Fixedpoint random3;
+
+    Fixedpoint noerror;
+    Fixedpoint format_error;
+    Fixedpoint overflow_positive;
+    Fixedpoint overflow_negative;
+    Fixedpoint underflow_positive;
+    Fixedpoint underflow_negative;
 } TestObjs;
 
 // functions to create and destroy the test fixture
@@ -117,6 +124,13 @@ TestObjs *setup(void)
     objs->random1 = fixedpoint_create2(0x85470e39ad685963UL, 0x49164df1f4c49560UL);
     objs->random2 = fixedpoint_create2(0x409c93ac8179c4fdUL, 0x445c9ed1442997a9UL);
     objs->random3 = fixedpoint_create2(0x029d73dc487b2702UL, 0x8e6cefdf1153d8c9UL);
+
+    objs->noerror = fixedpoint_create_from_hex("a45f4e3f0a4875.4e9");
+    objs->format_error = fixedpoint_create_from_hex("00fsadfka.kerjls-");
+    objs->overflow_positive = fixedpoint_add(objs->max, objs->max);
+    objs->overflow_negative = fixedpoint_double(fixedpoint_negate(objs->max));
+    objs->underflow_positive = fixedpoint_halve(fixedpoint_create_from_hex("0.1111111111111111"));
+    objs->underflow_negative = fixedpoint_halve(fixedpoint_create_from_hex("-0.0000000000000001"));
     return objs;
 }
 
@@ -825,28 +839,22 @@ void test_fixedpoint_compare(TestObjs *objs)
 void test_fixedpoint_is_err(TestObjs *objs)
 {
     // No error
-    Fixedpoint test1 = fixedpoint_create_from_hex("a45f4e3f0a4875.4e9");
-    ASSERT(fixedpoint_is_err(test1) == 0);
+    ASSERT(fixedpoint_is_err(objs->noerror) == 0);
 
     // Error on creation
-    Fixedpoint test2 = fixedpoint_create_from_hex("00fsadfka.kerjls-");
-    ASSERT(fixedpoint_is_err(test2) == 1);
+    ASSERT(fixedpoint_is_err(objs->format_error) == 1);
 
     // Positive Overflow Errors
-    Fixedpoint test3 = fixedpoint_add(objs->max, objs->max);
-    ASSERT(fixedpoint_is_err(test3) == 1);
+    ASSERT(fixedpoint_is_err(objs->overflow_positive) == 1);
 
     // Negative Overflow Errors
-    Fixedpoint test4 = fixedpoint_double(fixedpoint_negate(objs->max));
-    ASSERT(fixedpoint_is_err(test4) == 1);
+    ASSERT(fixedpoint_is_err(objs->overflow_negative) == 1);
 
     // Positive Underflow Error
-    Fixedpoint test5 = fixedpoint_halve(fixedpoint_create_from_hex("0.1111111111111111"));
-    ASSERT(fixedpoint_is_err(test5) == 1);
+    ASSERT(fixedpoint_is_err(objs->underflow_positive) == 1);
 
     // Negative Underflow Error
-    Fixedpoint test6 = fixedpoint_halve(fixedpoint_create_from_hex("-0.0000000000000001"));
-    ASSERT(fixedpoint_is_err(test6) == 1);
+    ASSERT(fixedpoint_is_err(objs->underflow_negative) == 1);
 }
 
 void test_fixedpoint_is_neg(TestObjs *objs)
@@ -863,24 +871,18 @@ void test_fixedpoint_is_neg(TestObjs *objs)
     // Negative
     Fixedpoint test3 = fixedpoint_create_from_hex("-a");
     ASSERT(fixedpoint_is_neg(test3) == 1);
-
-    // Errors
-    Fixedpoint test4 = fixedpoint_create_from_hex("00fsadfka.kerjls-");
-    ASSERT(fixedpoint_is_neg(test4) == 0);
+        // Error on creation
+    ASSERT(fixedpoint_is_neg(objs->format_error) == 0);
 
     // Positive Overflow Errors
-    Fixedpoint test5 = fixedpoint_add(objs->max, objs->max);
-    ASSERT(fixedpoint_is_neg(test5) == 0);
+    ASSERT(fixedpoint_is_neg(objs->overflow_positive) == 0);
 
     // Negative Overflow Errors
-    Fixedpoint test6 = fixedpoint_double(fixedpoint_negate(objs->max));
-    ASSERT(fixedpoint_is_neg(test6) == 0);
+    ASSERT(fixedpoint_is_neg(objs->overflow_negative) == 0);
 
     // Positive Underflow Error
-    Fixedpoint test7 = fixedpoint_halve(fixedpoint_create_from_hex("0.1111111111111111"));
-    ASSERT(fixedpoint_is_neg(test7) == 0);
+    ASSERT(fixedpoint_is_neg(objs->underflow_positive) == 0);
 
     // Negative Underflow Error
-    Fixedpoint test8 = fixedpoint_halve(fixedpoint_create_from_hex("-0.0000000000000001"));
-    ASSERT(fixedpoint_is_neg(test8) == 0);
+    ASSERT(fixedpoint_is_neg(objs->underflow_negative) == 0);
 }
