@@ -94,6 +94,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_add);
     TEST(test_fixedpoint_sub);
     TEST(test_fixedpoint_halve);
+    TEST(test_fixedpoint_double);
 
     TEST_FINI();
 }
@@ -749,4 +750,27 @@ void test_fixedpoint_halve(TestObjs *objs)
     ASSERT(test7.tag == VALID_NONNEGATIVE);
     ASSERT(test7.whole == 0UL);
     ASSERT(test7.frac == 0UL);
+}
+
+void test_fixedpoint_double(TestObjs *objs)
+{
+    // Valid X -> 2X, X is nonneg
+    Fixedpoint test1 = fixedpoint_double(fixedpoint_create_from_hex("a5213d2e.8192012758576"));
+    ASSERT(test1.tag == VALID_NONNEGATIVE);
+    ASSERT(test1.whole == 0x14a427a5dUL);
+    ASSERT(test1.frac == 0x0324024eb0aec000UL);
+
+    // Overflow X -> 2X, X is nonneg
+    Fixedpoint test2 = fixedpoint_double(objs->max);
+    ASSERT(test2.tag == OVERFLOW_POSITIVE);
+
+    // Valid X -> 2X, X is neg
+    Fixedpoint test3 = fixedpoint_double(fixedpoint_create_from_hex("-4072ac5f09d.11467503"));
+    ASSERT(test3.tag == VALID_NEGATIVE);
+    ASSERT(test3.whole == 0x80e558be13aUL);
+    ASSERT(test3.frac == 0x228cea0600000000UL);
+
+    // Overflow X -> 2X, X is neg
+    Fixedpoint test4 = fixedpoint_double(fixedpoint_negate(objs->max));
+    ASSERT(test4.tag == OVERFLOW_NEGATIVE);
 }

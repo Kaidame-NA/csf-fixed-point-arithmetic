@@ -198,7 +198,7 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
         // Normal addition with sign staying the same as whatever the sign of left and right are
         Fixedpoint sum;
         sum.frac = left.frac + right.frac;
-        if (sum.frac < left.frac) // If overflow, we need to carry
+        if (sum.frac < left.frac) // If overflow in fractional, we need to carry
         {
             sum.whole = 1UL + left.whole + right.whole;
         }
@@ -206,8 +206,10 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
         {
             sum.whole = left.whole + right.whole;
         }
-        // Check for overflow in whole portion
-        if (sum.whole < left.whole)
+        sum.tag = left.tag;
+
+        // Check for overflow
+        if (compare_magnitude(left,sum) == 1)
         {
             if (left.tag == VALID_NONNEGATIVE)
             {
@@ -217,10 +219,6 @@ Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
             {
                 sum.tag = OVERFLOW_NEGATIVE;
             }
-        }
-        else
-        {
-            sum.tag = left.tag;
         }
 
         return sum;
