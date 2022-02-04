@@ -93,6 +93,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_negate);
     TEST(test_fixedpoint_add);
     TEST(test_fixedpoint_sub);
+    TEST(test_fixedpoint_halve);
 
     TEST_FINI();
 }
@@ -389,7 +390,7 @@ void test_fixedpoint_is_zero(TestObjs *objs)
 void test_fixedpoint_create_from_hex(TestObjs *objs)
 {
     (void)objs;
-    // Valid Hex Strings 
+    // Valid Hex Strings
     // Format: X all lower
     Fixedpoint test1 = fixedpoint_create_from_hex("35d40bfd131c245d");
     ASSERT(test1.whole == 0x35d40bfd131c245dUL);
@@ -502,7 +503,7 @@ void test_fixedpoint_create_from_hex(TestObjs *objs)
     Fixedpoint test20 = fixedpoint_create_from_hex("94aa7a8bc03118f50.94aa7a8bc03118f05");
     ASSERT(test20.tag == ERROR);
 
-    //X.Y, X too long
+    // X.Y, X too long
     Fixedpoint test21 = fixedpoint_create_from_hex("1fab80b1e8e3ccce0.abcdef");
     ASSERT(test21.tag == ERROR);
 
@@ -525,7 +526,7 @@ void test_fixedpoint_create_from_hex(TestObjs *objs)
 // Additional tests for fixedpoint_negate;
 void test_fixedpoint_negate(TestObjs *objs)
 {
-    (void) objs;
+    (void)objs;
     // X -> -X
     Fixedpoint test1 = fixedpoint_create_from_hex("b4adb9d9d7e644c5");
     Fixedpoint test1negate = fixedpoint_negate(test1);
@@ -554,7 +555,7 @@ void test_fixedpoint_negate(TestObjs *objs)
     ASSERT(test4.whole == test4negate.whole);
     ASSERT(test4.frac == test4negate.frac);
 
-    // 0 
+    // 0
     Fixedpoint test5 = fixedpoint_create_from_hex("0");
     Fixedpoint test5negate = fixedpoint_negate(test5);
     ASSERT(test5negate.tag == VALID_NONNEGATIVE);
@@ -690,7 +691,7 @@ void test_fixedpoint_sub(TestObjs *objs)
 
     // Negative overflow A - B, A neg, B nonneg
     Fixedpoint test7A = fixedpoint_negate(objs->max);
-    Fixedpoint test7B = objs -> one;
+    Fixedpoint test7B = objs->one;
     Fixedpoint test7diff = fixedpoint_sub(test7A, test7B);
     ASSERT(test7diff.tag == OVERFLOW_NEGATIVE);
 
@@ -703,8 +704,49 @@ void test_fixedpoint_sub(TestObjs *objs)
     ASSERT(test8diff.frac == 0x3a434537691b7b20UL);
 
     // Positive overflow A - B, A pos, B neg
-    Fixedpoint test9A = objs -> max;
-    Fixedpoint test9B = fixedpoint_negate(objs -> one);
+    Fixedpoint test9A = objs->max;
+    Fixedpoint test9B = fixedpoint_negate(objs->one);
     Fixedpoint test9diff = fixedpoint_sub(test9A, test9B);
     ASSERT(test9diff.tag == OVERFLOW_POSITIVE);
+}
+
+void test_fixedpoint_halve(TestObjs *objs)
+{
+    // Valid X -> X/2, x nonneg
+    Fixedpoint test1 = fixedpoint_halve(fixedpoint_create_from_hex("e98a46c7860.d6"));
+    ASSERT(test1.tag == VALID_NONNEGATIVE);
+    ASSERT(test1.whole == 0x074c52363c30UL);
+    ASSERT(test1.frac == 0x6b00000000000000UL);
+
+    // Valid X -> X/2, x nonneg, whole part is odd
+    Fixedpoint test2 = fixedpoint_halve(fixedpoint_create_from_hex("13008cc93.f0c5f79138aa528"));
+    ASSERT(test2.tag == VALID_NONNEGATIVE);
+    ASSERT(test2.whole == 0x98046649UL);
+    ASSERT(test2.frac == 0xf862fbc89c552940UL);
+
+    // X -> X/2, x nonneg, underflow
+    Fixedpoint test3 = fixedpoint_halve(fixedpoint_create_from_hex("0.1111111111111111"));
+    ASSERT(test3.tag == UNDERFLOW_POSITIVE);
+
+    // Valid X -> X/2, x neg
+    Fixedpoint test4 = fixedpoint_halve(fixedpoint_create_from_hex("-d95a7652bf78.d9257b920d74"));
+    ASSERT(test4.tag == VALID_NEGATIVE);
+    ASSERT(test4.whole == 0x6cad3b295fbcUL);
+    ASSERT(test4.frac == 0x6c92bdc906ba0000UL);
+
+    // Valid X -> X/2, x neg, whole part is odd
+    Fixedpoint test5 = fixedpoint_halve(fixedpoint_create_from_hex("-691921ef4b8ba03.7c"));
+    ASSERT(test5.tag == VALID_NEGATIVE);
+    ASSERT(test5.whole == 0x348c90f7a5c5d01UL);
+    ASSERT(test5.frac == 0xbe00000000000000UL);
+
+    // X -> X/2, x neg, underflow
+    Fixedpoint test6 = fixedpoint_halve(fixedpoint_create_from_hex("-0.1111111111111111"));
+    ASSERT(test6.tag == UNDERFLOW_NEGATIVE);
+
+    // X -> X/2, x = 0
+    Fixedpoint test7 = fixedpoint_halve(objs->zero);
+    ASSERT(test7.tag == VALID_NONNEGATIVE);
+    ASSERT(test7.whole == 0UL);
+    ASSERT(test7.frac == 0UL);
 }

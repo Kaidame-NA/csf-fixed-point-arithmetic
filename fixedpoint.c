@@ -305,7 +305,7 @@ Fixedpoint fixedpoint_halve(Fixedpoint val)
     // If least significant bit in front of decimal is 1, we add 0.5 to fractional part after halving
     if (val.whole & 1UL)
     {
-        quotient.frac += (0xFFFFFFFFFFFFFFFFUL);
+        quotient.frac += (0x8000000000000000UL);
     }
 
     // If least significant bit in frac part is 1, we encounter underflow

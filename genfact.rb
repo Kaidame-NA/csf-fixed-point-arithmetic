@@ -144,6 +144,7 @@ if mode == :add
   # addition
   sum = lhs + rhs
   puts "#{lhs} + #{rhs} = #{sum}"
+  puts "#{lhs} + #{lhs} = #{lhs+lhs}"
 
 elsif mode == :subtraction
   # subtraction
