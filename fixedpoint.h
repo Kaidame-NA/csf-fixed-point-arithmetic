@@ -192,6 +192,18 @@ Fixedpoint fixedpoint_double(Fixedpoint val);
 //     1 if left > right
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right);
 
+// Compare two valid Fixedpoint values by their absolute values
+// 
+// Parameters:
+//   left - the left Fixedpoint value
+//   right - the right Fixedpoint value
+//
+// Returns:
+//    -1 if |left| < |right|;
+//     0 if |left| = |right|;
+//     1 if |left| > |right|;
+int compare_magnitude(Fixedpoint left, Fixedpoint right);
+
 // Determine whether a Fixedpoint value is equal to 0.
 //
 // Parameters:

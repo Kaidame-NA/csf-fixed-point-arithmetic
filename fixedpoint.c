@@ -184,16 +184,102 @@ uint64_t fixedpoint_frac_part(Fixedpoint val)
 
 Fixedpoint fixedpoint_add(Fixedpoint left, Fixedpoint right)
 {
-    // TODO: implement
-    assert(0);
-    return DUMMY;
+    if(left.tag != right.tag)
+    {
+        // If they are different signs, convert negative one to positive and perform subtraction
+        if(left.tag == VALID_NONNEGATIVE)
+        {
+            return fixedpoint_sub(left, fixedpoint_negate(right));
+        }
+        else
+        {
+            return fixedpoint_sub(right, fixedpoint_negate(left));
+        }
+    }
+    else
+    {
+        // Normal addition with sign staying the same as whatever the sign of left and right are
+        Fixedpoint sum;
+        sum.frac = left.frac + right.frac;
+        if(sum.frac < left.frac) // If overflow, we need to carry
+        {
+            sum.whole = 1UL + left.whole + right.whole;
+        }
+        else
+        {
+            sum.whole = left.whole + right.whole;
+        }
+        // Check for overflow in whole portion
+        if(sum.whole < left.whole)
+        {
+            if(left.tag == VALID_NONNEGATIVE)
+            {
+                sum.tag = OVERFLOW_NEGATIVE;
+            }
+            else
+            {
+                sum.tag = OVERFLOW_POSITIVE;
+            }
+        }
+        else
+        {
+            sum.tag = left.tag;
+        }
+
+        return sum;
+    }
 }
 
 Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
 {
-    // TODO: implement
-    assert(0);
-    return DUMMY;
+    if(left.tag != right.tag)
+    {
+        // If signs are different, we can calculate it using addition of two fixedpoints of the same sign
+        return fixedpoint_add(left, fixedpoint_negate(right));
+    }
+    else
+    {
+        // Determine sign by comparing which one is larger and then subtract the larger magnitude from the smaller magnitude
+        Fixedpoint difference;
+        if(fixedpoint_compare(left, right) == 1)
+        {
+            difference.tag = VALID_NEGATIVE;
+        }
+        else
+        {
+            difference.tag = VALID_NONNEGATIVE;
+        }
+
+        if(compare_magnitude(left, right) == 1)
+        {
+            // Perform borrow
+            if(right.frac > left.frac)
+            {
+                difference.whole = left.whole - right.whole - 1;
+                difference.frac = (0xFFFFFFFFFFFFFFFFUL - right.frac) + left.frac + 1; 
+            }
+            else
+            {
+                difference.whole = left.whole - right.whole;
+                difference.frac = left.frac - right.frac;
+            }
+        }
+        else
+        {
+            if(left.frac > right.frac)
+            {
+                difference.whole = right.whole - left.whole -1;
+                difference.frac = (0xFFFFFFFFFFFFFFFFUL - left.frac) + right.frac + 1;
+            }
+            else
+            {
+                difference.whole = right.whole - left.whole;
+                difference.frac = right.frac - left.frac;
+            }
+        }
+        
+        return difference;
+    }
 }
 
 Fixedpoint fixedpoint_negate(Fixedpoint val)
@@ -230,9 +316,58 @@ Fixedpoint fixedpoint_double(Fixedpoint val)
 
 int fixedpoint_compare(Fixedpoint left, Fixedpoint right)
 {
-    // TODO: implement
-    assert(0);
-    return 0;
+    // Compare signs
+    if(left.tag == right.tag)
+    {
+        if(left.tag == VALID_NONNEGATIVE)
+        {
+            return compare_magnitude(left, right);
+        }
+        else
+        {
+            return -compare_magnitude(left, right);
+        }
+    }
+    else
+    {
+        // Nonnegative is greater than negative
+        if(left.tag == VALID_NONNEGATIVE)
+        {
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+}
+
+int compare_magnitude(Fixedpoint left, Fixedpoint right)
+{
+    // Compare whole portions
+    if(left.whole == right.whole)
+    {
+        if(left.frac == right.frac)
+        {
+            return 0;
+        }
+        else if(left.frac > right.frac)
+        {
+            return 1;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else if(left.whole > right.whole)
+    {
+        return 1;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 int fixedpoint_is_zero(Fixedpoint val)
