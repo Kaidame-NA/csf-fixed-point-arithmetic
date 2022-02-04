@@ -107,6 +107,8 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_is_neg);
     TEST(test_fixedpoint_is_overflow_neg);
     TEST(test_fixedpoint_is_overflow_pos);
+    TEST(test_fixedpoint_is_underflow_neg);
+    TEST(test_fixedpoint_is_underflow_pos);
 
     TEST_FINI();
 }
@@ -929,4 +931,46 @@ void test_fixedpoint_is_overflow_pos(TestObjs *objs)
 
     // Negative Underflow Error
     ASSERT(fixedpoint_is_overflow_pos(objs->underflow_negative) == 0);
+}
+
+void test_fixedpoint_is_underflow_neg(TestObjs *objs)
+{
+    // No error
+    ASSERT(fixedpoint_is_underflow_neg(objs->noerror) == 0);
+
+    // Error on Creation
+    ASSERT(fixedpoint_is_underflow_neg(objs->format_error) == 0);
+
+    // Positive Overflow Errors
+    ASSERT(fixedpoint_is_underflow_neg(objs->overflow_positive) == 0);
+
+    // Negative Overflow Errors
+    ASSERT(fixedpoint_is_underflow_neg(objs->overflow_negative) == 0);
+
+    // Positive Underflow Error
+    ASSERT(fixedpoint_is_underflow_neg(objs->underflow_positive) == 0);
+
+    // Negative Underflow Error
+    ASSERT(fixedpoint_is_underflow_neg(objs->underflow_negative) == 1);
+}
+
+void test_fixedpoint_is_underflow_pos(TestObjs *objs)
+{
+    // No error
+    ASSERT(fixedpoint_is_underflow_pos(objs->noerror) == 0);
+
+    // Error on Creation
+    ASSERT(fixedpoint_is_underflow_pos(objs->format_error) == 0);
+
+    // Positive Overflow Errors
+    ASSERT(fixedpoint_is_underflow_pos(objs->overflow_positive) == 0);
+
+    // Negative Overflow Errors
+    ASSERT(fixedpoint_is_underflow_pos(objs->overflow_negative) == 0);
+
+    // Positive Underflow Error
+    ASSERT(fixedpoint_is_underflow_pos(objs->underflow_positive) == 1);
+
+    // Negative Underflow Error
+    ASSERT(fixedpoint_is_underflow_pos(objs->underflow_negative) == 0);
 }
