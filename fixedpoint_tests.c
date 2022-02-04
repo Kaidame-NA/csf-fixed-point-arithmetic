@@ -110,6 +110,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_is_underflow_neg);
     TEST(test_fixedpoint_is_underflow_pos);
     TEST(test_fixedpoint_is_valid);
+    TEST(test_fixedpoint_format_as_hex);
 
     TEST_FINI();
 }
@@ -876,7 +877,7 @@ void test_fixedpoint_is_neg(TestObjs *objs)
     // Negative
     Fixedpoint test3 = fixedpoint_create_from_hex("-a");
     ASSERT(fixedpoint_is_neg(test3) == 1);
-        // Error on creation
+    // Error on creation
     ASSERT(fixedpoint_is_neg(objs->format_error) == 0);
 
     // Positive Overflow Errors
@@ -995,4 +996,37 @@ void test_fixedpoint_is_valid(TestObjs *objs)
 
     // Negative Underflow Error
     ASSERT(fixedpoint_is_underflow_pos(objs->underflow_negative) == 0);
+}
+
+void test_fixedpoint_format_as_hex(TestObjs *objs)
+{
+    // 0
+    char *test1 = fixedpoint_format_as_hex(objs->zero);
+    ASSERT(strcmp(test1, "0") == 0);
+    free(test1);
+
+    // X, X is nonneg 
+    char *test2 = fixedpoint_format_as_hex(fixedpoint_create_from_hex("04d3261aa5b6899"));
+    ASSERT(strcmp(test2, "4d3261aa5b6899") == 0);
+    free(test2);
+
+    // X.Y, nonneg with trailing 0s
+    char *test3 = fixedpoint_format_as_hex(fixedpoint_create_from_hex("57a0960.48a5dc539d00"));
+    ASSERT(strcmp(test3, "57a0960.48a5dc539d") == 0);
+    free(test3);
+
+    // X.Y, nonneg with zeroes in front of fractional part
+    char *test4 = fixedpoint_format_as_hex(fixedpoint_create_from_hex("54ed471ba08d0.0528456"));
+    ASSERT(strcmp(test4, "54ed471ba08d0.0528456") == 0);
+    free(test4);
+
+    // X, X is neg
+    char *test5 = fixedpoint_format_as_hex(fixedpoint_create_from_hex("-e0702c"));
+    ASSERT(strcmp(test5, "-e0702c") == 0);
+    free(test5);
+
+    // X.Y, X.Y is neg
+    char *test6 = fixedpoint_format_as_hex(fixedpoint_create_from_hex("-aff74682477b5c8.d4"));
+    ASSERT(strcmp(test6, "-aff74682477b5c8.d4") == 0);
+    free(test6);
 }

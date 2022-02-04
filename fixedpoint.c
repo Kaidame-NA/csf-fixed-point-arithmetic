@@ -441,7 +441,7 @@ int fixedpoint_is_valid(Fixedpoint val)
 
 char *fixedpoint_format_as_hex(Fixedpoint val)
 {
-    char *s = malloc(35 * sizeof(char));
+    char *s = calloc(35,  sizeof(char));
     size_t nextIndex = 0;
     if (fixedpoint_is_err(val))
     {
@@ -477,14 +477,22 @@ char *fixedpoint_format_as_hex(Fixedpoint val)
         // Convert frac part to string
         char frac[17];
         // Remove trailing 0s
+        int zeroesRemoved = 0;
         uint64_t fracCopy = val.frac;
-        while ((fracCopy & 1UL) == 0)
+        while ((fracCopy & 0xFUL) == 0)
         {
-            fracCopy >>= 1UL;
+            fracCopy >>= 4;
+            //printf("%lu\n", fracCopy);
+            zeroesRemoved++;
         }
         sprintf(frac, "%lx", fracCopy);
+
+        // Add zeroes after the decimal point if needed
+        for(int i = strlen(frac) + zeroesRemoved; i < 16; i++)
+        {
+            s[nextIndex++] = '0';
+        }
         strcpy(s + nextIndex, frac);
-        s[nextIndex + 1] = '0';
     }
     return s;
 }
