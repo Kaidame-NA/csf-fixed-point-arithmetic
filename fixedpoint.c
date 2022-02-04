@@ -167,6 +167,12 @@ void parseHex(const char *hex, Fixedpoint *ptrFixedPoint)
     // https://stackoverflow.com/questions/10156409/convert-hex-string-char-to-int
     ptrFixedPoint->whole = strtoul(wholeString, NULL, 16);
     ptrFixedPoint->frac = strtoul(fracString, NULL, 16);
+
+    // Handle edge case of -0
+    if(ptrFixedPoint->whole == 0 && ptrFixedPoint-> frac == 0)
+    {
+        ptrFixedPoint->tag = VALID_NONNEGATIVE;
+    }
 }
 
 uint64_t fixedpoint_whole_part(Fixedpoint val)
