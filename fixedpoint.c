@@ -238,7 +238,7 @@ Fixedpoint fixedpoint_sub(Fixedpoint left, Fixedpoint right)
     {
         // Determine sign by comparing which one is larger and then subtract the larger magnitude from the smaller magnitude
         Fixedpoint difference;
-        if (fixedpoint_compare(left, right) == 1)
+        if (fixedpoint_compare(left, right) >= 0)
         {
             difference.tag = VALID_NONNEGATIVE;
         }

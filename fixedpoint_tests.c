@@ -92,6 +92,7 @@ int main(int argc, char **argv)
     TEST(test_fixedpoint_create_from_hex);
     TEST(test_fixedpoint_negate);
     TEST(test_fixedpoint_add);
+    TEST(test_fixedpoint_sub);
 
     TEST_FINI();
 }
@@ -628,7 +629,7 @@ void test_fixedpoint_add(TestObjs *objs)
     Fixedpoint test9sum = fixedpoint_add(test9A, test9B);
     ASSERT(test9sum.tag == VALID_NEGATIVE);
     ASSERT(test9sum.whole == 0xe0a68f5ab6cda6eUL);
-    ASSERT(test9sum.frac == 0x2e670e7f4e800000);
+    ASSERT(test9sum.frac == 0x2e670e7f4e800000UL);
 
     // Valid A + B, A neg, B nonneg, nonnneg result
     Fixedpoint test10A = fixedpoint_create_from_hex("-dfc94da.cce");
@@ -636,5 +637,74 @@ void test_fixedpoint_add(TestObjs *objs)
     Fixedpoint test10sum = fixedpoint_add(test10A, test10B);
     ASSERT(test10sum.tag == VALID_NONNEGATIVE);
     ASSERT(test10sum.whole == 0xf51b225UL);
-    ASSERT(test10sum.frac == 0x3320000000000000);
+    ASSERT(test10sum.frac == 0x3320000000000000UL);
+}
+
+// Additional tests for fixedpoint subtraction
+void test_fixedpoint_sub(TestObjs *objs)
+{
+    // Valid A - B, A nonneg, B nonneg, nonneg result
+    Fixedpoint test1A = fixedpoint_create_from_hex("65f4dd17c108b6.32ed");
+    Fixedpoint test1B = fixedpoint_create_from_hex("4d30ee90b.82dbe48c3fe1");
+    Fixedpoint test1diff = fixedpoint_sub(test1A, test1B);
+    ASSERT(test1diff.tag == VALID_NONNEGATIVE);
+    ASSERT(test1diff.whole == 0x65f4d844b21faaUL);
+    ASSERT(test1diff.frac == 0xb0111b73c01f0000UL);
+
+    // Valid A - B, A nonneg, B nonneg, neg result
+    Fixedpoint test2A = fixedpoint_create_from_hex("461053.a");
+    Fixedpoint test2B = fixedpoint_create_from_hex("c3667eb.645a5b");
+    Fixedpoint test2diff = fixedpoint_sub(test2A, test2B);
+    ASSERT(test2diff.tag == VALID_NEGATIVE);
+    ASSERT(test2diff.whole == 0xbf05797UL);
+    ASSERT(test2diff.frac == 0xc45a5b0000000000UL);
+
+    // Valid A - B, A = B, zero result
+    Fixedpoint test3diff = fixedpoint_sub(objs->random1, objs->random1);
+    ASSERT(fixedpoint_is_zero(test3diff));
+    ASSERT(test3diff.tag == VALID_NONNEGATIVE);
+
+    // Valid A - B, A neg, B neg, nonneg result
+    Fixedpoint test4A = fixedpoint_create_from_hex("-316c1832a1.e844428906968");
+    Fixedpoint test4B = fixedpoint_create_from_hex("-49bf5e3b79bf17.7777d1e8f");
+    Fixedpoint test4diff = fixedpoint_sub(test4A, test4B);
+    ASSERT(test4diff.tag == VALID_NONNEGATIVE);
+    ASSERT(test4diff.whole == 0x49bf2ccf618c75UL);
+    ASSERT(test4diff.frac == 0x8f338f5fe9698000UL);
+
+    // Valid A - B, A neg, B neg, neg result
+    Fixedpoint test5A = fixedpoint_create_from_hex("-3f8d2494a9.5ac545d");
+    Fixedpoint test5B = fixedpoint_create_from_hex("-27c137f.7a0affc8ff");
+    Fixedpoint test5diff = fixedpoint_sub(test5A, test5B);
+    ASSERT(test5diff.tag == VALID_NEGATIVE);
+    ASSERT(test5diff.whole == 0x3f8aa88129UL);
+    ASSERT(test5diff.frac == 0xe0ba460701000000UL);
+
+    // Valid A - B, A neg, B nonneg, neg result
+    Fixedpoint test6A = fixedpoint_create_from_hex("-a9983fa9.1d2");
+    Fixedpoint test6B = fixedpoint_create_from_hex("9aec7246cb8.e8552c0");
+    Fixedpoint test6diff = fixedpoint_sub(test6A, test6B);
+    ASSERT(test6diff.tag == VALID_NEGATIVE);
+    ASSERT(test6diff.whole == 0x9af70bcac62UL);
+    ASSERT(test6diff.frac == 0x05752c0000000000UL);
+
+    // Negative overflow A - B, A neg, B nonneg
+    Fixedpoint test7A = fixedpoint_negate(objs->max);
+    Fixedpoint test7B = objs -> one;
+    Fixedpoint test7diff = fixedpoint_sub(test7A, test7B);
+    ASSERT(test7diff.tag == OVERFLOW_NEGATIVE);
+
+    // Valid A - B, A pos, B neg, nonneg result
+    Fixedpoint test8A = fixedpoint_create_from_hex("ba011d3720f.0f9273");
+    Fixedpoint test8B = fixedpoint_create_from_hex("-beae87e117.2ab0d237691b7b2");
+    Fixedpoint test8diff = fixedpoint_sub(test8A, test8B);
+    ASSERT(test8diff.tag == VALID_NONNEGATIVE);
+    ASSERT(test8diff.whole == 0xc5ec05b5326UL);
+    ASSERT(test8diff.frac == 0x3a434537691b7b20UL);
+
+    // Positive overflow A - B, A pos, B neg
+    Fixedpoint test9A = objs -> max;
+    Fixedpoint test9B = fixedpoint_negate(objs -> one);
+    Fixedpoint test9diff = fixedpoint_sub(test9A, test9B);
+    ASSERT(test9diff.tag == OVERFLOW_POSITIVE);
 }
